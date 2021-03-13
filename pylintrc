@@ -1,5 +1,2 @@
-[DESIGN]
-max-locals=25
-
 [MESSAGES CONTROL]
 disable=missing-module-docstring, unsubscriptable-object
