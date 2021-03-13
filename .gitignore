@@ -1,0 +1,8 @@
+.mypy_cache/
+.python-version
+build/
+dist/
+poetry.lock
+*.pyc
+dnd_info.egg-info
+*__pycache__*
