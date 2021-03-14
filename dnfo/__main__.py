@@ -1,16 +1,11 @@
 """entry point for the whole application"""
 from __future__ import annotations
 import argparse
-import shutil
-import textwrap
 import requests
+import rich
+from rich.columns import Columns
 
 base_url: str = "https://www.dnd5eapi.co/api"
-
-
-def get_term_columns() -> int:
-    """get the terminal width. used to fit text to the screen"""
-    return shutil.get_terminal_size().columns
 
 
 def query_api(query: str) -> tuple[int, list[dict[str, str]]]:
@@ -23,18 +18,18 @@ def query_api(query: str) -> tuple[int, list[dict[str, str]]]:
     return count, results
 
 
-def parse_json(count: int, results: list):
-    """parse the API response"""
-    for result in range(count):
-        print(results[result]["name"])
+def print_options(results: list):
+    """get the names of all results for a searched field"""
+    rich.print(Columns(results, expand=True))
 
 
-def print_results(results: list):
-    """print all search results"""
-    width = get_term_columns()
-    for line in " ".join(results).splitlines(True):
-        # TODO find a way to keep words intact
-        print(*textwrap.wrap(line, width), sep="\n")
+def get_arguments() -> argparse.Namespace:
+    """get the arguments"""
+    parser = argparse.ArgumentParser()
+    categories = parser.add_mutually_exclusive_group()
+    categories.add_argument_group("spells")
+
+    return parser.parse_args()
 
 
 def main():
