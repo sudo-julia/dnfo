@@ -1,21 +1,8 @@
 """entry point for the whole application"""
 from __future__ import annotations
 import argparse
-import requests
 import rich
 from rich.columns import Columns
-
-base_url: str = "https://www.dnd5eapi.co/api"
-
-
-def query_api(query: str) -> tuple[int, list[dict[str, str]]]:
-    """search the API with a given query
-    return the number of results and a list containing the results
-    """
-    response: dict = requests.get(f"{base_url}/{query}").json()
-    count: int = response["count"]
-    results: list[dict[str, str]] = response["results"]
-    return count, results
 
 
 def print_options(results: list):
@@ -25,8 +12,10 @@ def print_options(results: list):
 
 def get_arguments() -> argparse.Namespace:
     """get the arguments"""
+    # TODO subparsers, bitch
     parser = argparse.ArgumentParser()
     categories = parser.add_mutually_exclusive_group(required=True)
+
     # char data
     categories.add_argument("ability_score")
     categories.add_argument("skill")
