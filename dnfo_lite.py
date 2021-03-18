@@ -24,7 +24,8 @@ ENDPOINTS: tuple = (
     "equipment-categories",
     "equipment",
     "magic-items",
-    "weapon-properties" "spells",
+    "weapon-properties",
+    "spells",
     "monsters",
     "conditions",
     "damage-types",
@@ -45,14 +46,23 @@ class EndpointResponse(TypedDict):
 def main() -> int:
     """main"""
     args = get_args()
-    if len(args) == 2:
-        pass
-    elif len(args) == 1 and args[0] not in ["-h", "--help"]:
-        print_indexes(query_endpoint(args[0]), args[0])
-    else:
-        print("help/usage section")
-        sys.exit(1)
+    endpoint: str = args[0]
+    check_endpoint(endpoint)
+    try:
+        index: str = args[1]
+    except IndexError:
+        print_indexes(query_endpoint(endpoint), endpoint)
+        return 0
+    print(index)
     return 0
+
+
+def check_endpoint(endpoint: str):
+    """check if the endpoint given is valid"""
+    if endpoint.casefold() not in ENDPOINTS:
+        print("Invalid endpoint! Options are:")
+        rich.print(Columns(ENDPOINTS, expand=True))
+        sys.exit(1)
 
 
 def query_endpoint(endpoint: str) -> EndpointResponse:
@@ -60,7 +70,8 @@ def query_endpoint(endpoint: str) -> EndpointResponse:
     url: str = f"{BASE_URL}/{endpoint}"
     response = requests.get(url)
     if response.status_code != 200:
-        print("Invalid endpoint!")
+        print("Invalid endpoint! Options are:")
+        rich.print(Columns(ENDPOINTS, expand=True))
         sys.exit(1)
     response = response.json()
     return response
@@ -80,13 +91,16 @@ def get_args():
     """get arguments with sys.argv
     argument format is: endpoint, index
     """
+    if len(sys.argv) == 1 or ["-h", "--help"] in sys.argv:
+        usage(1)
     args: list[str] = sys.argv[1:]
     return args
 
 
-def usage():
+def usage(exit_code=0):
     """help/usage section"""
     print("help, usage:")
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":
