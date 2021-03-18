@@ -15,16 +15,18 @@ def main() -> int:
     """main"""
     args = get_arguments()
     print(args)
-    results = query_endpoint("spells")  # type: ignore
-    result_names: list[str] = []
-    for name in range(results["count"]):
-        result_names.append(results["results"][name]["index"])
-    print_options(result_names)
-    for name in range(5):
-        spell_name = results["results"][name]["index"]
-        # x = query_endpoint(f"spells/{results['results'][name]['index']}")
-        print(query_index("spells", spell_name).text)
-        # print(x.text)
+    for value in args.values():
+        if not value:
+            continue
+        print(value)
+    # results = query_endpoint("spells")  # type: ignore
+    # result_names: list[str] = []
+    # for name in range(results["count"]):
+    # result_names.append(results["results"][name]["index"])
+    # print_options(result_names)
+    # for name in range(5):
+    # spell_name = results["results"][name]["index"]
+    # print(query_index("spells", spell_name).text)
     return 0
 
 
