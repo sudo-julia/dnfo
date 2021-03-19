@@ -2,11 +2,12 @@
 from __future__ import annotations
 import json
 import sys
-from typing import TypedDict
+from typing import Any, TypedDict
 import requests
 from rich import print
 from rich.columns import Columns
 from rich.panel import Panel
+from rich.table import Table
 
 BASE_URL: str = "https://www.dnd5eapi.co/api"
 ENDPOINTS: tuple = (
@@ -35,7 +36,7 @@ ENDPOINTS: tuple = (
     "rules",
     "rule-sections",
 )
-VERSION: str = "0.1.0"
+VERSION: str = "0.2.0"
 
 
 # pylint: disable=R0903
@@ -97,9 +98,23 @@ def print_index_options(response: EndpointResponse, endpoint: str):
     )
 
 
-def print_index(index: dict):
+def print_index(index: dict[str, Any]):
     """print information on an index"""
     print(json.dumps(index, indent=1, separators=(",", ":")))
+    table = Table(title=index["name"], show_lines=True)
+    table.add_column("Key", justify="left")
+    table.add_column("Value")
+    for key, value in index.items():
+        if not value or key == "url":
+            continue
+        if isinstance(value, list):
+            value = " ".join(str(v) for v in value)
+        elif isinstance(value, dict):
+            value = json.dumps(value)
+        elif isinstance(value, (bool, int)):
+            value = str(value)
+        table.add_row(key.title(), value)
+    print(table)
 
 
 def main() -> int:
