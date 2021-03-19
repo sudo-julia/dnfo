@@ -1,5 +1,6 @@
 """lite version of dnfo"""
 from __future__ import annotations
+import json
 import sys
 from typing import TypedDict
 import requests
@@ -33,28 +34,15 @@ ENDPOINTS: tuple = (
     "rules",
     "rule-sections",
 )
+
+
 # pylint: disable=R0903
-
-
+# TODO update this with some optionals for the different index types
 class EndpointResponse(TypedDict):
     """dictionary typing for the response of any endpoint"""
 
     count: int
     results: list[dict[str, str]]
-
-
-def main() -> int:
-    """main"""
-    args = get_args()
-    endpoint: str = args[0]
-    check_endpoint(endpoint)
-    try:
-        index: str = args[1]
-    except IndexError:
-        print_indexes(query_endpoint(endpoint), endpoint)
-        return 0
-    print(index)
-    return 0
 
 
 def check_endpoint(endpoint: str):
@@ -65,17 +53,20 @@ def check_endpoint(endpoint: str):
         sys.exit(1)
 
 
-def query_endpoint(endpoint: str) -> EndpointResponse:
+def query_api(endpoint: str, index=None):
     """query an endpoint for its available indexes"""
     url: str = f"{BASE_URL}/{endpoint}"
+    if index:
+        url += f"/{index}"
     response = requests.get(url)
     if response.status_code != 200:
+        print(f"Error. Either {index} is not a valid index or {endpoint} is invalid.")
         usage(1)
     response = response.json()
     return response
 
 
-def print_indexes(response: EndpointResponse, endpoint: str):
+def print_index_options(response: EndpointResponse, endpoint: str):
     """print available indexes for a given endpoint"""
     index_options: list[str] = []
     for name in range(response["count"]):
@@ -86,11 +77,19 @@ def print_indexes(response: EndpointResponse, endpoint: str):
     print(f"Run 'dnfo {endpoint} [index]' to get info on a {get_singular(endpoint)}!")
 
 
+def print_index(index: dict):
+    """print information on an index"""
+    print(json.dumps(index, indent=1, separators=(",", ":")))
+
+
 def get_args():
     """get arguments with sys.argv
     argument format is: endpoint, index
     """
     if len(sys.argv) == 1 or ["-h", "--help", "help"] in sys.argv:
+        usage()
+    if len(sys.argv) > 3:
+        print("For the time being, only one endpoint and one index is supported.")
         usage(1)
     args: list[str] = sys.argv[1:]
     return args
@@ -105,6 +104,19 @@ def get_singular(word: str) -> str:
     else:
         word = word.removesuffix("s")
     return word.replace("-", " ")
+
+
+def main() -> int:
+    """main"""
+    args = get_args()
+    endpoint: str = args[0]
+    check_endpoint(endpoint)
+    try:
+        index: str = args[1]
+        print_index(query_api(endpoint, index))
+    except IndexError:
+        print_index_options(query_api(endpoint), endpoint)
+    return 0
 
 
 def usage(exit_code=0):
