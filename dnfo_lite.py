@@ -70,36 +70,50 @@ def query_endpoint(endpoint: str) -> EndpointResponse:
     url: str = f"{BASE_URL}/{endpoint}"
     response = requests.get(url)
     if response.status_code != 200:
-        print("Invalid endpoint! Options are:")
-        rich.print(Columns(ENDPOINTS, expand=True))
-        sys.exit(1)
+        usage(1)
     response = response.json()
     return response
 
 
 def print_indexes(response: EndpointResponse, endpoint: str):
-    """:"""
+    """print available indexes for a given endpoint"""
     index_options: list[str] = []
     for name in range(response["count"]):
         index_options.append(response["results"][name]["index"])
-    print(f"Possible options for {endpoint}:")
+    del response
+    print(f"Possible indexes for {endpoint}:")
     rich.print(Columns(index_options, expand=True))
-    print(f"Run 'dnfo [{endpoint}] [index]' to get info on an index!")
+    print(f"Run 'dnfo {endpoint} [index]' to get info on a {get_singular(endpoint)}!")
 
 
 def get_args():
     """get arguments with sys.argv
     argument format is: endpoint, index
     """
-    if len(sys.argv) == 1 or ["-h", "--help"] in sys.argv:
+    if len(sys.argv) == 1 or ["-h", "--help", "help"] in sys.argv:
         usage(1)
     args: list[str] = sys.argv[1:]
     return args
 
 
+def get_singular(word: str) -> str:
+    """get the singular form of a word"""
+    if word[-3:] == "ies":
+        word = word.replace("ies", "y")
+    elif word[-2:] == "es":
+        word = word.removesuffix("es")
+    else:
+        word = word.removesuffix("s")
+    return word.replace("-", " ")
+
+
 def usage(exit_code=0):
     """help/usage section"""
-    print("help, usage:")
+    print("usage: dnfo_lite [endpoint] [index]")
+    print("To find available indexes on an endpoint, type dnfo [endpoint], ", end="")
+    print("with available endpoints being:")
+    # TODO put these in a rich.table
+    rich.print(Columns(ENDPOINTS, expand=True))
     sys.exit(exit_code)
 
 
