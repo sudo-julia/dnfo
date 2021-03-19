@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "dnfo"
 version = "0.1.0"
-description = "cli tool to parse the DnD5e API"
+description = "cli tool to display information from the D&D 5e API"
 authors = ["sudo-julia <jlearning@tuta.io>"]
 license = "GPL-3.0"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.7"
 requests = "^2.25.1"
 rich = "^9.13.0"
 
