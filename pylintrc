@@ -1,2 +1,2 @@
 [MESSAGES CONTROL]
-disable=missing-module-docstring, unsubscriptable-object
+disable=redefined-builtin
