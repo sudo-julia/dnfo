@@ -1,10 +1,10 @@
 """lite version of dnfo"""
 from __future__ import annotations
-import json
 import sys
 from typing import Any, TypedDict
 import requests
 from rich import print
+from rich import box
 from rich.columns import Columns
 from rich.panel import Panel
 from rich.table import Table
@@ -99,26 +99,21 @@ def print_index_options(response: EndpointResponse, endpoint: str):
 
 
 def print_index(index: dict[str, Any]):
-    """print information on an index"""
-    print(json.dumps(index, indent=1, separators=(",", ":")))
-    table = Table(title=index["name"], show_lines=True)
-    table.add_column("Key", justify="left")
-    table.add_column("Value")
+    """format the information of a dictionary to a rich Table and print"""
+    table = Table(title=index["name"], show_lines=True, box=box.HEAVY_EDGE)
+    table.add_column("Name")
+    table.add_column("Description")
     for key, value in index.items():
         if not value or key == "url":
             continue
-        if isinstance(value, list):
-            value = " ".join(str(v) for v in value)
-        elif isinstance(value, dict):
-            value = json.dumps(value)
-        elif isinstance(value, (bool, int)):
-            value = str(value)
+        key = key.replace("_", " ")
+        value = make_renderable(value)
         table.add_row(key.title(), value)
     print(table)
 
 
 def main() -> int:
-    """main"""
+    """query the endpoint with given arguments"""
     args = get_args()
     endpoint: str = args[0]
     check_endpoint(endpoint)
@@ -130,6 +125,28 @@ def main() -> int:
     return 0
 
 
+def make_renderable(word: Any) -> str:
+    """change a variable to a renderable format"""
+    if isinstance(word, (bool, int, str)):
+        pass
+    elif isinstance(word, list):
+        if check_types(word, str):
+            word = " ".join(str(v) for v in word)
+        # TODO figure out formatting for this
+        elif check_types(word, dict):
+            word = " ".join(str(v) for v in word)
+    elif isinstance(word, dict):
+        word = url_to_command(word["name"], word["url"])
+    return str(word)
+
+
+def url_to_command(name: str, url: str) -> str:
+    """change an API response url to a string that matches dnfo's cli syntax"""
+    access_point: str = url[5:].replace("/", " ")
+    string: str = f"{name}: `dnfo_lite.py {access_point}`"
+    return string
+
+
 def make_singular(word: str) -> str:
     """get the singular form of a word"""
     if word[-3:] == "ies":
@@ -137,6 +154,14 @@ def make_singular(word: str) -> str:
     else:
         word = word.removesuffix("s")
     return word.replace("-", " ")
+
+
+def check_types(list_: list, type_: Any) -> bool:
+    """check to see if every item in a list matches the given type"""
+    for value in list_:
+        if not isinstance(value, type_):
+            return False
+    return True
 
 
 def usage(exit_code=0):
