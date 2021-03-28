@@ -34,7 +34,9 @@ setup(
     install_requires=[
         "requests>=2.25.1",
         "rich>=>=9.13.0",
+        "pymongo>=3.11.3",
+        "GitPython>=3.1.14",
     ],
     python_requires=">=3.7",
-    entry_points={"console_scripts": ["dnfo = dnfo_lite.py"]},
+    entry_points={"console_scripts": ["dnfo = dnfo.__main__:main"]},
 )
