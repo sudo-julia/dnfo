@@ -1,9 +1,10 @@
 .mypy_cache/
 .python-version
 .vim/
+*@neomake*.py$
 build/
 dist/
 poetry.lock
-*.pyc
+*.pyc$
 dnd_info.egg-info
 *__pycache__*

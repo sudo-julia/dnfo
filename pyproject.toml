@@ -11,6 +11,7 @@ requests = "^2.25.1"
 rich = "^9.13.0"
 pymongo = "^3.11.3"
 GitPython = "^3.1.14"
+appdirs = "^1.4.4"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
