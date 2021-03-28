@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""lite version of dnfo"""
+"""display info from the Dnd 5th edition API"""
 from __future__ import annotations
 import sys
 from typing import Any, TypedDict
@@ -29,7 +29,7 @@ def get_args():
     if len(sys.argv) == 1 or ["-h", "--help", "help"] in sys.argv:
         usage()
     elif ["-v", "--version"] in sys.argv:
-        print(f"dnfo_lite v{__version__}")
+        print(f"dnfo v{__version__}")
         sys.exit()
     elif len(sys.argv) > 3 and sys.argv[1] not in SECONDARIES:
         print(f"{sys.argv[1]} only supports one index as an argument.")
@@ -74,7 +74,7 @@ def print_index_options(response: EndpointResponse, endpoint: str):
 
 def print_index(index: dict[str, Any]):
     """format the information of a dictionary to a rich Table and print"""
-    print(index)
+    # for debugging: print(index)
     table = Table(title=index["name"], show_lines=True, box=box.HEAVY_EDGE)
     table.add_column("Name")
     table.add_column("Description")

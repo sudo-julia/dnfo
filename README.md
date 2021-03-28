@@ -17,7 +17,7 @@ To get available indexes of an endpoint, run the command without an index:
   - [ ] Populate the database and create a .lock file, with a regeneration
 if requested by the user
 - [ ] Tests
-- [ ] Formatting of gear packs/starting equipment
+- [ ] Formatting of dictionaries as values in a dict
 - [X] Print rows that fit the size of the command prompt
 - [X] Store all options in arrays and check arguments against them
 - [X] Format all received data in a rich Table
