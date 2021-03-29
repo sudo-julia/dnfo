@@ -28,16 +28,35 @@ def get_args():
     """get arguments with sys.argv
     argument format is: endpoint, index
     """
-    if len(sys.argv) == 1 or (set(["-h", "--help", "help"]) & set(sys.argv)):
+    args: list = sys.argv[1:]
+    if not args:
         usage()
-    elif set(["-v", "--version"]) & set(sys.argv):
+    handle_args(args)
+    return args
+
+
+def handle_args(args: list):
+    """handle arguments"""
+    arg_set: set = set(args)
+    help_set: set[str] = set(["-h", "--help"])
+    ver_set: set[str] = set(["-v", "--version"])
+    exit_code: int = 0
+
+    if arg_set & ver_set:
         print(f"[white]dnfo v{__version__}")
         sys.exit()
-    elif len(sys.argv) > 3 and sys.argv[1] not in SECONDARIES:
-        print(f"{sys.argv[1]} only supports one index as an argument.")
-        usage(1)
-    args: list[str] = sys.argv[1:]
-    return args
+    if arg_set & help_set:
+        pass
+    elif "--build" in arg_set:
+        sys.exit(populate_db())
+    elif "--clear" in arg_set:
+        sys.exit(clear_db())
+    elif len(args) > 2 and args[0] not in SECONDARIES:
+        print(f"{args[0]} only supports one index as an argument.")
+        exit_code = 1
+    else:
+        return
+    usage(exit_code)
 
 
 def check_endpoint(endpoint: str):
@@ -89,20 +108,6 @@ def print_index(index: dict[str, Any]):
     print(table)
 
 
-def main() -> int:
-    """query the endpoint with given arguments"""
-    args = get_args()
-    endpoint: str = args[0]
-    check_endpoint(endpoint)
-    # TODO add support for items in SECONDARIES having optional third/fourth args
-    try:
-        index: str = args[1]
-        print_index(query_api(endpoint, index))
-    except IndexError:
-        print_index_options(query_api(endpoint), endpoint)
-    return 0
-
-
 # TODO find a way to print dictionaries as a string
 def make_renderable(word: Any) -> str:
     """change a variable to a renderable format"""
@@ -145,16 +150,31 @@ def check_types(list_: list, type_: Any) -> bool:
 
 def usage(exit_code=0):
     """help/usage section"""
-    help_msg: str = """usage: dnfo_lite.py \\[endpoint] \\[index]
+    help_msg: str = """usage: dnfo \\[endpoint] \\[index]
 
 optional arguments:
-\t-h, --help    \tshow this help and exit
+\t-h, --help   \tshow this help and exit
 \t-v, --version\tprint version information
+\t--build      \tpopulate the database
+\t--clear      \tclear the database
     """
     print(help_msg)
-    # TODO put these in a rich.table
     print(Panel(Columns(ENDPOINTS, expand=True), title="Available endpoints:"))
     sys.exit(exit_code)
+
+
+def main() -> int:
+    """query the endpoint with given arguments"""
+    args = get_args()
+    endpoint: str = args[0]
+    check_endpoint(endpoint)
+    # TODO add support for items in SECONDARIES having optional third/fourth args
+    try:
+        index: str = args[1]
+        print_index(query_api(endpoint, index))
+    except IndexError:
+        print_index_options(query_api(endpoint), endpoint)
+    return 0
 
 
 if __name__ == "__main__":
