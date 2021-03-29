@@ -1,4 +1,4 @@
-"""database operations for dnfo"""
+"""populate the DnD 5th edition database"""
 from __future__ import annotations
 import json
 import shutil
@@ -10,8 +10,6 @@ import git
 
 
 # TODO download older release if database breaks
-NAME: str = "dnfo"
-AUTHOR: str = "sudo_julia"
 
 
 def download_db(url: str, location: str) -> str:
@@ -80,7 +78,9 @@ def validate_json(file: Path) -> bool:
 
 def populate_db() -> int:
     """perform the bulk of the operations"""
-    data_dir: str = appdirs.user_data_dir(NAME, AUTHOR)  # path to data dir
+    name: str = "dnfo"
+    author: str = "sudo_julia"
+    data_dir: str = appdirs.user_data_dir(name, author)  # path to data dir
     db_dir: Path = Path(f"{data_dir}/db")  # path to database dir
     hash_file: Path = Path(f"{data_dir}/old_HEAD")
     url: str = "https://github.com/5e-bits/5e-database"  # url for database
@@ -104,20 +104,5 @@ def populate_db() -> int:
     return 0
 
 
-def clear_db() -> int:
-    """clear the database to be repopulated"""
-    data_dir: str = appdirs.user_data_dir(NAME, AUTHOR)
-    try:
-        shutil.rmtree(data_dir)
-        print("Successfully cleared database!")
-    except PermissionError:
-        print(f"Unable to clear database at {data_dir} due to permission errors.")
-        return 1
-    return 0
-
-
 if __name__ == "__main__":
-    print("Attempting population...")
     populate_db()
-    print("Clearing populated database...")
-    clear_db()

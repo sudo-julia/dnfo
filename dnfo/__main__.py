@@ -11,6 +11,8 @@ from rich.columns import Columns
 from rich.panel import Panel
 from rich.table import Table
 from dnfo import BASE_URL, ENDPOINTS, SECONDARIES, __version__
+from dnfo.database_ops.clear import clear_db
+from dnfo.database_ops.populate import populate_db
 
 
 # pylint: disable=R0903
@@ -26,10 +28,10 @@ def get_args():
     """get arguments with sys.argv
     argument format is: endpoint, index
     """
-    if len(sys.argv) == 1 or ["-h", "--help", "help"] in sys.argv:
+    if len(sys.argv) == 1 or (set(["-h", "--help", "help"]) & set(sys.argv)):
         usage()
-    elif ["-v", "--version"] in sys.argv:
-        print(f"dnfo v{__version__}")
+    elif set(["-v", "--version"]) & set(sys.argv):
+        print(f"[white]dnfo v{__version__}")
         sys.exit()
     elif len(sys.argv) > 3 and sys.argv[1] not in SECONDARIES:
         print(f"{sys.argv[1]} only supports one index as an argument.")
