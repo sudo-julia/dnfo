@@ -11,6 +11,8 @@ import git
 
 # TODO progress bar!!
 # TODO download older release if database breaks
+NAME: str = "dnfo"
+AUTHOR: str = "sudo_julia"
 
 
 def download_db(url: str, location: str) -> str:
@@ -21,14 +23,14 @@ def download_db(url: str, location: str) -> str:
     return hexsha
 
 
-def hashes_match(hash_file: Path, newhash: str, force=None) -> bool:
+def hashes_match(hash_file: Path, newhash: str) -> bool:
     """compare the hash of recently pulled repo with the stored hash
     returns True if hashes match. returns False if the hashes are different.
     """
     try:
         with open(hash_file, "r") as file:
             oldhash: str = file.read().strip()
-        if oldhash == newhash and not force:
+        if oldhash == newhash:
             return False
     except FileNotFoundError:
         pass
@@ -38,7 +40,15 @@ def hashes_match(hash_file: Path, newhash: str, force=None) -> bool:
         return True  # pylint: disable=W0150
 
 
-def copy_json(source: str, dest: str) -> bool:
+def dir_empty(dir_path: Path) -> bool:
+    """check if a directory is empty"""
+    has_next = next(dir_path.iterdir(), None)
+    if not has_next:
+        return True
+    return False
+
+
+def copy_json(source: str, dest: Path) -> bool:
     """move files to data directory"""
     print("Copying files to local database...")
     src_dir = Path(f"{source}/src")
@@ -63,35 +73,44 @@ def validate_json(file: Path) -> bool:
     return True
 
 
-def populate_db(name: str, author: str) -> int:
+def populate_db() -> int:
     """perform the bulk of the operations"""
-    data_dir: str = appdirs.user_data_dir(name, author)  # path to data dir
-    db_dir: str = f"{data_dir}/db"  # path to database dir
+    data_dir: str = appdirs.user_data_dir(NAME, AUTHOR)  # path to data dir
+    db_dir: Path = Path(f"{data_dir}/db")  # path to database dir
     hash_file: Path = Path(f"{data_dir}/old_HEAD")
     url: str = "https://github.com/5e-bits/5e-database"  # url for database
 
     try:
         print(f"Creating '{db_dir}' for database storage...")
-        Path(db_dir).mkdir(parents=True)
+        db_dir.mkdir(parents=True)
     except FileExistsError:
         print("Using existing database.")
 
     with tempfile.TemporaryDirectory(prefix="dnfo.") as tmpdir:
         head_hash = download_db(url, tmpdir)
-        if hashes_match(hash_file, head_hash):
-            # TODO option to overwrite
+        dir_empty(db_dir)
+        if hashes_match(hash_file, head_hash) and not dir_empty(db_dir):
             print("Database is already up to date. Cancelling operation.")
             return 0
         if not copy_json(tmpdir, db_dir):
             print("Error copying JSON.")
             return 1
+    print("Database populated successfully!")
     return 0
 
 
-def clear_db():
+def clear_db() -> int:
     """clear the database to be repopulated"""
-    ...
+    data_dir: str = appdirs.user_data_dir(NAME, AUTHOR)
+    try:
+        shutil.rmtree(data_dir)
+        print("Successfully cleared database!")
+    except PermissionError:
+        print(f"Unable to clear database at {data_dir} due to permission errors.")
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    populate_db("dnfo", "sudo_julia")
+    populate_db()
+    # clear_db()
