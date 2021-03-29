@@ -5,8 +5,8 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import Generator
-import appdirs
 import git
+from dnfo.database_ops.data_vars import DATA_DIR, DB_DIR
 
 
 # TODO download older release if database breaks
@@ -78,26 +78,26 @@ def validate_json(file: Path) -> bool:
 
 def populate_db() -> int:
     """perform the bulk of the operations"""
-    name: str = "dnfo"
-    author: str = "sudo_julia"
-    data_dir: str = appdirs.user_data_dir(name, author)  # path to data dir
-    db_dir: Path = Path(f"{data_dir}/db")  # path to database dir
-    hash_file: Path = Path(f"{data_dir}/old_HEAD")
+    # name: str = "dnfo"
+    # author: str = "sudo_julia"
+    # DATA_DIR: str = appdirs.user_DATA_DIR(name, author)  # path to data dir
+    # DB_DIR: Path = Path(f"{DATA_DIR}/dnfo_db")  # path to database dir
+    hash_file: Path = Path(f"{DATA_DIR}/old_HEAD")
     url: str = "https://github.com/5e-bits/5e-database"  # url for database
 
     try:
-        print(f"Creating '{db_dir}' for database storage...")
-        db_dir.mkdir(parents=True)
+        print(f"Creating '{DB_DIR}' for database storage...")
+        DB_DIR.mkdir(parents=True)
     except FileExistsError:
         print("Using existing database.")
 
     with tempfile.TemporaryDirectory(prefix="dnfo.") as tmpdir:
         head_hash = download_db(url, tmpdir)
-        dir_empty(db_dir)
-        if hashes_match(hash_file, head_hash) and not dir_empty(db_dir):
+        dir_empty(DB_DIR)
+        if hashes_match(hash_file, head_hash) and not dir_empty(DB_DIR):
             print("Database is already up to date. Cancelling operation.")
             return 0
-        if not copy_json(tmpdir, db_dir):
+        if not copy_json(tmpdir, DB_DIR):
             print("Error copying JSON.")
             return 1
     print("Database populated successfully!")

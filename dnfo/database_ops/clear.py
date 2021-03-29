@@ -1,18 +1,15 @@
 """clear the local database"""
 import shutil
-import appdirs
+from dnfo.database_ops.data_vars import DATA_DIR
 
 
 def clear_db() -> int:
     """clear the database to be repopulated"""
-    name: str = "dnfo"
-    author: str = "sudo_julia"
-    data_dir: str = appdirs.user_data_dir(name, author)
     try:
-        shutil.rmtree(data_dir)
+        shutil.rmtree(DATA_DIR)
         print("Successfully cleared database!")
     except PermissionError:
-        print(f"Unable to clear database at {data_dir} due to permission errors.")
+        print(f"Unable to clear database at {DATA_DIR} due to permission errors.")
         return 1
     return 0
 
