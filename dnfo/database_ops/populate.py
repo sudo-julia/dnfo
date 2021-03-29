@@ -6,10 +6,11 @@ import tempfile
 from pathlib import Path
 from typing import Generator
 import git
-from dnfo.database_ops.data_vars import DATA_DIR, DB_DIR
+from dnfo.database_ops import DATA_DIR, DB_DIR, URL
 
 
 # TODO download older release if database breaks
+# TODO put these in a class with clear as a method
 
 
 def download_db(url: str, location: str) -> str:
@@ -25,14 +26,14 @@ def hashes_match(hash_file: Path, newhash: str) -> bool:
     returns True if hashes match. returns False if the hashes are different.
     """
     try:
-        with open(hash_file, "r") as file:
+        with hash_file.open() as file:
             oldhash: str = file.read().strip()
         if oldhash == newhash:
             return False
     except FileNotFoundError:
         pass
     finally:
-        with open(hash_file, "w") as file:
+        with hash_file.open() as file:
             file.write(newhash.strip())
         return True  # pylint: disable=W0150
 
@@ -69,7 +70,7 @@ def validate_json(file: Path) -> bool:
     return True if file is valid
     """
     try:
-        with open(file) as file_loc:
+        with file.open() as file_loc:
             json.load(file_loc)
     except ValueError:
         return False
@@ -78,12 +79,7 @@ def validate_json(file: Path) -> bool:
 
 def populate_db() -> int:
     """perform the bulk of the operations"""
-    # name: str = "dnfo"
-    # author: str = "sudo_julia"
-    # DATA_DIR: str = appdirs.user_DATA_DIR(name, author)  # path to data dir
-    # DB_DIR: Path = Path(f"{DATA_DIR}/dnfo_db")  # path to database dir
     hash_file: Path = Path(f"{DATA_DIR}/old_HEAD")
-    url: str = "https://github.com/5e-bits/5e-database"  # url for database
 
     try:
         print(f"Creating '{DB_DIR}' for database storage...")
@@ -92,8 +88,7 @@ def populate_db() -> int:
         print("Using existing database.")
 
     with tempfile.TemporaryDirectory(prefix="dnfo.") as tmpdir:
-        head_hash = download_db(url, tmpdir)
-        dir_empty(DB_DIR)
+        head_hash = download_db(URL, tmpdir)
         if hashes_match(hash_file, head_hash) and not dir_empty(DB_DIR):
             print("Database is already up to date. Cancelling operation.")
             return 0

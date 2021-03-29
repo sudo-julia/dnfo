@@ -13,6 +13,7 @@ from rich.table import Table
 from dnfo import BASE_URL, ENDPOINTS, SECONDARIES, __version__
 from dnfo.database_ops.clear import clear_db
 from dnfo.database_ops.populate import populate_db
+from dnfo.database_ops.build import main as builder
 
 
 # pylint: disable=R0903

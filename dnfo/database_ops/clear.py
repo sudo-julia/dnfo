@@ -1,6 +1,6 @@
 """clear the local database"""
 import shutil
-from dnfo.database_ops.data_vars import DATA_DIR
+from dnfo.database_ops import DATA_DIR
 
 
 def clear_db() -> int:
