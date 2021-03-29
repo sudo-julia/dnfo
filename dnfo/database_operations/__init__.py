@@ -1,4 +1,4 @@
-"""get and build the database"""
+"""database operations for dnfo"""
 from __future__ import annotations
 import json
 import shutil
@@ -9,7 +9,6 @@ import appdirs
 import git
 
 
-# TODO progress bar!!
 # TODO download older release if database breaks
 NAME: str = "dnfo"
 AUTHOR: str = "sudo_julia"
@@ -41,7 +40,9 @@ def hashes_match(hash_file: Path, newhash: str) -> bool:
 
 
 def dir_empty(dir_path: Path) -> bool:
-    """check if a directory is empty"""
+    """check if a directory is empty
+    return True if empty
+    """
     has_next = next(dir_path.iterdir(), None)
     if not has_next:
         return True
@@ -49,7 +50,9 @@ def dir_empty(dir_path: Path) -> bool:
 
 
 def copy_json(source: str, dest: Path) -> bool:
-    """move files to data directory"""
+    """move all json files from source to dest
+    return True if successful
+    """
     print("Copying files to local database...")
     src_dir = Path(f"{source}/src")
     json_files: Generator = src_dir.glob("*.json")
@@ -64,7 +67,9 @@ def copy_json(source: str, dest: Path) -> bool:
 
 
 def validate_json(file: Path) -> bool:
-    """validate a json file, return True if file is valid"""
+    """validate a json file
+    return True if file is valid
+    """
     try:
         with open(file) as file_loc:
             json.load(file_loc)
@@ -112,5 +117,7 @@ def clear_db() -> int:
 
 
 if __name__ == "__main__":
+    print("Attempting population...")
     populate_db()
-    # clear_db()
+    print("Clearing populated database...")
+    clear_db()
