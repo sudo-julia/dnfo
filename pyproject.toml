@@ -1,6 +1,10 @@
+[tool.black]
+line-length = 88
+exclude = 'dnfo/__init__.py'
+
 [tool.poetry]
 name = "dnfo"
-version = "0.1.0"
+version = "1.0.0"
 description = "cli tool to display information from the D&D 5e API"
 authors = ["sudo-julia <jlearning@tuta.io>"]
 license = "GPL-3.0"

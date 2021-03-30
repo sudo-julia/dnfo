@@ -10,10 +10,9 @@ from rich import box
 from rich.columns import Columns
 from rich.panel import Panel
 from rich.table import Table
-from dnfo import BASE_URL, ENDPOINTS, SECONDARIES, __version__
+from dnfo import BASE_URL, ENDPOINTS, SECONDARIES, __version__, remove_suffix
 from dnfo.database_ops.clear import clear_db
 from dnfo.database_ops.populate import populate_db
-from dnfo.database_ops.build import main as builder
 
 
 # pylint: disable=R0903
@@ -137,7 +136,7 @@ def make_singular(word: str) -> str:
     if word[-3:] == "ies":
         word = word.replace("ies", "y")
     else:
-        word = word.removesuffix("s")
+        word = remove_suffix(word, "s")
     return word.replace("-", " ")
 
 
