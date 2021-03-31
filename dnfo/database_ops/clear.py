@@ -5,6 +5,7 @@ from dnfo.database_ops import DATA_DIR
 
 def clear_db() -> int:
     """clear the database to be repopulated"""
+    # TODO drop the local database as well
     try:
         shutil.rmtree(DATA_DIR)
         print("Successfully cleared database!")

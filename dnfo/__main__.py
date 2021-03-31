@@ -5,14 +5,13 @@ from __future__ import annotations
 import sys
 from typing import Any, TypedDict
 import requests
-from rich import print
-from rich import box
+from rich import box, print
 from rich.columns import Columns
 from rich.panel import Panel
 from rich.table import Table
 from dnfo import BASE_URL, ENDPOINTS, SECONDARIES, __version__, remove_suffix
+from dnfo.database_ops.build import populate_db
 from dnfo.database_ops.clear import clear_db
-from dnfo.database_ops.populate import populate_db
 
 
 # pylint: disable=R0903
@@ -178,4 +177,5 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    main()
+    builder()
+    # main()
