@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import shutil
 import tempfile
+from datetime import date
 from pathlib import Path
 from typing import Generator
 import git
@@ -26,11 +27,8 @@ def download_db(url: str, location: str) -> str:
 def hashes_match(lockfile: Path, newlock: str) -> bool:
     """read a lockfile to see if the database needs to be updated.
     additionally, check if hashes match"""
-    # TODO option to suggest the user to rebuild the database every week,
-    #      with the last date read from the lockfile
     try:
         with lockfile.open() as file:
-            # TODO modify this to read a json file
             oldlock: str = file.read().strip()
         if oldlock == newlock:
             return False
@@ -40,6 +38,25 @@ def hashes_match(lockfile: Path, newlock: str) -> bool:
         with lockfile.open() as file:
             file.write(newlock.strip())
         return True  # pylint: disable=W0150
+
+
+def locks(lockfile: Path, newlock: str) -> bool:
+    """read a lockfile to see if the database needs to be updated.
+    additionally, check if hashes match
+    """
+    # TODO option to suggest the user to rebuild the database every week,
+    #      with the last date read from the lockfile
+    lockdict: dict[str, date | str] = {"date": date.today(), "hash": newlock}
+    try:
+        oldlock: dict = json.load(lockfile.open())
+        if oldlock["hash"] == lockdict["hash"]:
+            return False
+    except FileNotFoundError:
+        pass
+    finally:
+        with lockfile.open("w") as file:
+            file.write(json.dumps(lockdict, indent=4))
+    return True  # TODO should this be in finally block?
 
 
 def dir_empty(dir_path: Path) -> bool:
@@ -83,7 +100,7 @@ def validate_json(file: Path) -> bool:
 
 def populate_db() -> int:
     """perform the bulk of the operations"""
-    hash_file: Path = Path(f"{DATA_DIR}/old_HEAD")
+    hash_file: Path = Path(f"{DATA_DIR}/dnfo.lock")
 
     try:
         print(f"Creating '{DB_DIR}' for database storage...")

@@ -1,11 +1,12 @@
-# dnd_info
+# dnfo
 
 Search the [DnD5e API](https://www.dnd5eapi.co) and return relevant information
 
-## Requirements
+## Optional Requirements
 
-- [`mongodb`](https://docs.mongodb.com/manual/installation/) installed and
-running on the default host and port.
+- If you want to query a local database (it's faster and works offline!),
+install [`mongodb`](https://docs.mongodb.com/manual/installation/)
+and make sure it's running on the default host and port.
 
 ## Usage
 

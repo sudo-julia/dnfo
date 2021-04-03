@@ -38,6 +38,8 @@ def handle_args(args: list) -> list:
         sys.exit()
     if arg_set & help_set:
         usage()
+    elif "--rebuild" in arg_set:
+        sys.exit(clear_db() + populate_db())
     elif "--build" in arg_set:
         sys.exit(populate_db())
     elif "--clear" in arg_set:
@@ -48,13 +50,12 @@ def handle_args(args: list) -> list:
         usage(1)
 
     # TODO handle this better (maybe use a dict)
-    if "--web" in arg_set:
-        args.remove("--web")
-        args.insert(0, "--web")
-    elif "--local" in arg_set:
+    if "--local" in arg_set:
         args.remove("--local")
         args.insert(0, "--local")
     else:
+        if "--web" in args:
+            args.remove("--web")
         args.insert(0, "--web")
     return args
 
@@ -86,7 +87,6 @@ def print_index_options(response: list[dict[str, Any]], endpoint: str):
 
 def print_index(index: dict[str, Any]):
     """format the information of a dictionary to a rich Table and print"""
-    # for debugging: print(index)
     table = Table(title=index["name"], show_lines=True, box=box.HEAVY_EDGE)
     table.add_column("Name")
     table.add_column("Description")
@@ -152,6 +152,7 @@ optional arguments:
 database operations:
 \t--build      \tpopulate the database
 \t--clear      \tclear the database
+\t--rebuild    \trebuild the database
     """
     print(help_msg)
     print(Panel(Columns(ENDPOINTS, expand=True), title="Available endpoints:"))
