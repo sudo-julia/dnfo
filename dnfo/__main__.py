@@ -42,15 +42,20 @@ def handle_args(args: list) -> list:
         sys.exit(populate_db())
     elif "--clear" in arg_set:
         sys.exit(clear_db())
-    elif len(args) > 2 and args[0] not in SECONDARIES:
+    # TODO fix this while accounting for --local|web
+    elif len(args) > 5 and args[0] not in SECONDARIES:
         print(f"{args[0]} only supports one index as an argument.")
         usage(1)
-    if "--local" in arg_set:
-        args.insert(0, "local")
-    elif "--web" in arg_set:
-        args.insert(0, "web")
+
+    # TODO handle this better (maybe use a dict)
+    if "--web" in arg_set:
+        args.remove("--web")
+        args.insert(0, "--web")
+    elif "--local" in arg_set:
+        args.remove("--local")
+        args.insert(0, "--local")
     else:
-        args.insert(0, "web")
+        args.insert(0, "--web")
     return args
 
 
@@ -156,14 +161,16 @@ database operations:
 def main() -> int:
     """query the endpoint with given arguments"""
     args = get_args()
-    location: str = args.pop(0)
+    try:
+        location: str = args.pop(args.index("--web"))
+    except ValueError:
+        location: str = args.pop(args.index("--local"))
     endpoint: str = args.pop(0)
-    # TODO support for any placement of location flag
     check_endpoint(endpoint)
     # TODO add support for items in SECONDARIES having optional third/fourth args
     try:
         index: str = args.pop()
-        if location == "web":
+        if location == "--web":
             query = query_website(endpoint, index)
         else:
             query = query_database(endpoint, index)
