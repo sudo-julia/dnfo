@@ -3,90 +3,77 @@
 """display info from the Dnd 5th edition API"""
 from __future__ import annotations
 import sys
-from typing import Any, TypedDict
-import requests
+from typing import Any
 from rich import box, print
 from rich.columns import Columns
 from rich.panel import Panel
 from rich.table import Table
-from dnfo import BASE_URL, ENDPOINTS, SECONDARIES, __version__, remove_suffix
+from dnfo import ENDPOINTS, SECONDARIES, __version__, remove_suffix
+from dnfo.queries import query_database, query_website
 from dnfo.database_ops.build import populate_db
 from dnfo.database_ops.clear import clear_db
 
 
-# pylint: disable=R0903
-# TODO update this with some optionals for the different index types
-class EndpointResponse(TypedDict):
-    """dictionary typing for the response of any endpoint"""
-
-    count: int
-    results: list[dict[str, str]]
-
-
 def get_args():
     """get arguments with sys.argv
-    argument format is: endpoint, index
+    argument format is: location: (local, web), endpoint, index
     """
     args: list = sys.argv[1:]
     if not args:
         usage()
-    handle_args(args)
+    args = handle_args(args)
     return args
 
 
-def handle_args(args: list):
+def handle_args(args: list) -> list:
     """handle arguments"""
+    # TODO args for local and web, with fallback to config file if neither is given
+    # TODO if config file doesn't exist/isn't populated, default to website
     arg_set: set = set(args)
     help_set: set[str] = set(["-h", "--help"])
     ver_set: set[str] = set(["-v", "--version"])
-    exit_code: int = 0
 
     if arg_set & ver_set:
         print(f"[white]dnfo v{__version__}")
         sys.exit()
     if arg_set & help_set:
-        pass
+        usage()
     elif "--build" in arg_set:
         sys.exit(populate_db())
     elif "--clear" in arg_set:
         sys.exit(clear_db())
     elif len(args) > 2 and args[0] not in SECONDARIES:
         print(f"{args[0]} only supports one index as an argument.")
-        exit_code = 1
+        usage(1)
+    if "--local" in arg_set:
+        args.insert(0, "local")
+    elif "--web" in arg_set:
+        args.insert(0, "web")
     else:
-        return
-    usage(exit_code)
+        args.insert(0, "web")
+    return args
 
 
 def check_endpoint(endpoint: str):
     """check if the endpoint given is valid"""
     if endpoint.casefold() not in ENDPOINTS:
         print("Invalid endpoint! Options are:")
-        print(Columns(ENDPOINTS, expand=True))
+        print(Panel(Columns(ENDPOINTS, expand=True)))
         sys.exit(1)
 
 
-def query_api(endpoint: str, index=None):
-    """query an endpoint for its available indexes"""
-    url: str = f"{BASE_URL}/{endpoint}"
-    if index:
-        url += f"/{index}"
-    response = requests.get(url)
-    if response.status_code != 200:
-        print(f"Error. Either {index} is not a valid index or {endpoint} is invalid.")
-        usage(1)
-    response = response.json()
-    return response
-
-
-def print_index_options(response: EndpointResponse, endpoint: str):
+def print_index_options(response: list[dict[str, Any]], endpoint: str):
     """print available indexes for a given endpoint"""
     index_options: list[str] = []
-    for name in range(response["count"]):
-        index_options.append(response["results"][name]["index"])
+    for item, _ in enumerate(response):
+        index_options.append(response[item]["index"])
     del response
-    print(f"Possible indexes for {endpoint}:")
-    print(Panel(Columns(index_options, expand=True), title=f"Indexes for {endpoint}"))
+    print(
+        Panel(
+            Columns(index_options, expand=True),
+            title=f"Available indexes for {endpoint}:",
+        )
+    )
     print(
         f"Run 'dnfo {endpoint} \\[index]' to get info on a {make_singular(endpoint)}!"
     )
@@ -154,6 +141,10 @@ def usage(exit_code=0):
 optional arguments:
 \t-h, --help   \tshow this help and exit
 \t-v, --version\tprint version information
+\t--local      \tuse a local database
+\t--web        \tuse the database located at dnd5eapi.co
+
+database operations:
 \t--build      \tpopulate the database
 \t--clear      \tclear the database
     """
@@ -165,17 +156,26 @@ optional arguments:
 def main() -> int:
     """query the endpoint with given arguments"""
     args = get_args()
-    endpoint: str = args[0]
+    location: str = args.pop(0)
+    endpoint: str = args.pop(0)
+    # TODO support for any placement of location flag
     check_endpoint(endpoint)
     # TODO add support for items in SECONDARIES having optional third/fourth args
     try:
-        index: str = args[1]
-        print_index(query_api(endpoint, index))
+        index: str = args.pop()
+        if location == "web":
+            query = query_website(endpoint, index)
+        else:
+            query = query_database(endpoint, index)
+        print_index(query)  # type: ignore
     except IndexError:
-        print_index_options(query_api(endpoint), endpoint)
+        if location == "web":
+            query = query_website(endpoint)
+        else:
+            query = query_database(endpoint)
+        print_index_options(query_website(endpoint), endpoint)
     return 0
 
 
 if __name__ == "__main__":
-    builder()
-    # main()
+    main()

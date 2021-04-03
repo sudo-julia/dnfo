@@ -24,6 +24,7 @@ Config
 
 - [ ] Tests
 - [ ] Formatting of dictionaries as values in a dict
+- [ ] If disconnected from internet and database is built, use the db
 - [X] Store responses in a database
   - [ ] Populate the database and create a .lock file, with a regeneration
 if requested by the user

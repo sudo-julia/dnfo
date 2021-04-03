@@ -23,20 +23,22 @@ def download_db(url: str, location: str) -> str:
     return hexsha
 
 
-def hashes_match(hash_file: Path, newhash: str) -> bool:
-    """compare the hash of recently pulled repo with the stored hash
-    returns True if hashes match. returns False if the hashes are different.
-    """
+def hashes_match(lockfile: Path, newlock: str) -> bool:
+    """read a lockfile to see if the database needs to be updated.
+    additionally, check if hashes match"""
+    # TODO option to suggest the user to rebuild the database every week,
+    #      with the last date read from the lockfile
     try:
-        with hash_file.open() as file:
-            oldhash: str = file.read().strip()
-        if oldhash == newhash:
+        with lockfile.open() as file:
+            # TODO modify this to read a json file
+            oldlock: str = file.read().strip()
+        if oldlock == newlock:
             return False
     except FileNotFoundError:
         pass
     finally:
-        with hash_file.open() as file:
-            file.write(newhash.strip())
+        with lockfile.open() as file:
+            file.write(newlock.strip())
         return True  # pylint: disable=W0150
 
 
@@ -127,6 +129,5 @@ def build(rebuild=None):
 
 def lock():
     """create a lockfile containing a hash and the last checked date"""
-    # TODO option to suggest the user to rebuild the database every week,
-    #      with the last date read from the lockfile
-    ...
+    lockfile = Path(f"{DATA_DIR}/dnfo.lock")
+    # try to read file, if it's empty then populate it. similar to hash checking
