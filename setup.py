@@ -14,7 +14,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/sudo-julia/dnfo",
     packages=find_packages(),
-    modules=["dnfo_args"],
+    modules=["database_ops", "queries"],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",

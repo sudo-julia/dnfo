@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """display info from the Dnd 5th edition API"""
 from __future__ import annotations
@@ -39,7 +38,7 @@ def handle_args(args: list) -> list:
     if arg_set & help_set:
         usage()
     elif "--rebuild" in arg_set:
-        sys.exit(clear_db() + populate_db())
+        sys.exit(populate_db(rebuild=True))
     elif "--build" in arg_set:
         sys.exit(populate_db())
     elif "--clear" in arg_set:
@@ -60,11 +59,16 @@ def handle_args(args: list) -> list:
     return args
 
 
+def print_panel(columns, title=None):
+    """print a rich"""
+    print(Panel(Columns(columns, expand=True), title=title))
+
+
 def check_endpoint(endpoint: str):
     """check if the endpoint given is valid"""
     if endpoint.casefold() not in ENDPOINTS:
         print("Invalid endpoint! Options are:")
-        print(Panel(Columns(ENDPOINTS, expand=True)))
+        print_panel(ENDPOINTS)
         sys.exit(1)
 
 
@@ -74,12 +78,7 @@ def print_index_options(response: list[dict[str, Any]], endpoint: str):
     for item, _ in enumerate(response):
         index_options.append(response[item]["index"])
     del response
-    print(
-        Panel(
-            Columns(index_options, expand=True),
-            title=f"Available indexes for {endpoint}:",
-        )
-    )
+    print_panel(index_options, f"Available indexes for {endpoint}:")
     print(
         f"Run 'dnfo {endpoint} \\[index]' to get info on a {make_singular(endpoint)}!"
     )
@@ -162,12 +161,12 @@ database operations:
 def main() -> int:
     """query the endpoint with given arguments"""
     args = get_args()
+    location: str = args.pop(0)
     try:
-        location: str = args.pop(args.index("--web"))
-    except ValueError:
-        location: str = args.pop(args.index("--local"))
-    endpoint: str = args.pop(0)
-    check_endpoint(endpoint)
+        endpoint: str = args.pop(0)
+        check_endpoint(endpoint)
+    except IndexError:
+        usage()
     # TODO add support for items in SECONDARIES having optional third/fourth args
     try:
         index: str = args.pop()

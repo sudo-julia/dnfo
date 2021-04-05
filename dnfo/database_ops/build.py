@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """build the database"""
 from __future__ import annotations
 import json
@@ -40,13 +41,16 @@ def hashes_match(lockfile: Path, newlock: str) -> bool:
         return True  # pylint: disable=W0150
 
 
-def locks(lockfile: Path, newlock: str) -> bool:
+def lock(lockfile: Path, newlock: str) -> bool:
     """read a lockfile to see if the database needs to be updated.
     additionally, check if hashes match
     """
     # TODO option to suggest the user to rebuild the database every week,
     #      with the last date read from the lockfile
-    lockdict: dict[str, date | str] = {"date": date.today(), "hash": newlock}
+    lockdict: dict[str, date | str] = {
+        "date": date.today().strftime("%Y-%m-%d"),
+        "hash": newlock,
+    }
     try:
         oldlock: dict = json.load(lockfile.open())
         if oldlock["hash"] == lockdict["hash"]:
@@ -56,7 +60,7 @@ def locks(lockfile: Path, newlock: str) -> bool:
     finally:
         with lockfile.open("w") as file:
             file.write(json.dumps(lockdict, indent=4))
-    return True  # TODO should this be in finally block?
+    return True
 
 
 def dir_empty(dir_path: Path) -> bool:
@@ -78,7 +82,6 @@ def copy_json(source: str, dest: Path) -> bool:
     json_files: Generator = src_dir.glob("*.json")
 
     for file in json_files:
-        # TODO display errors properly
         if not validate_json(file):
             print(f"'{file}' does not contain valid JSON data.\nAborting operation.")
             return False
@@ -98,36 +101,12 @@ def validate_json(file: Path) -> bool:
     return True
 
 
-def populate_db() -> int:
-    """perform the bulk of the operations"""
-    hash_file: Path = Path(f"{DATA_DIR}/dnfo.lock")
-
-    try:
-        print(f"Creating '{DB_DIR}' for database storage...")
-        DB_DIR.mkdir(parents=True)
-    except FileExistsError:
-        print("Using existing database.")
-
-    with tempfile.TemporaryDirectory(prefix="dnfo.") as tmpdir:
-        head_hash = download_db(URL, tmpdir)
-        if hashes_match(hash_file, head_hash) and not dir_empty(DB_DIR):
-            print("Database is already up to date. Cancelling operation.")
-            return 0
-        if not copy_json(tmpdir, DB_DIR):
-            print("Error copying JSON.")
-            return 1
-    build()
-    print("Database populated successfully!")
-    return 0
-
-
-def build(rebuild=None):
+def build(rebuild=False) -> bool:
     """insert all documents into the database"""
     client: MongoClient = MongoClient()
-    # TODO rebuild option
     if "dnfo_db" in client.list_database_names() and not rebuild:
-        print("Database already exists!")
-        return
+        print("Database already exists!\nUse the `--rebuild` option to override.")
+        return False
     database = client["dnfo_db"]
     files = DB_DIR.glob("*.json")
     for file in files:
@@ -142,9 +121,28 @@ def build(rebuild=None):
         else:
             coll.insert_one(data)
     print("All documents successfully inserted into the database!")
+    return True
 
 
-def lock():
-    """create a lockfile containing a hash and the last checked date"""
-    lockfile = Path(f"{DATA_DIR}/dnfo.lock")
-    # try to read file, if it's empty then populate it. similar to hash checking
+def populate_db(rebuild=False) -> int:
+    """perform the bulk of the operations"""
+    lockfile: Path = Path(f"{DATA_DIR}/dnfo.lock")
+
+    try:
+        DB_DIR.mkdir(parents=True)
+        print(f"Creating '{DB_DIR}' for database storage...")
+    except FileExistsError:
+        print("Using existing database.")
+
+    with tempfile.TemporaryDirectory(prefix="dnfo.") as tmpdir:
+        head_hash = download_db(URL, tmpdir)
+        if lock(lockfile, head_hash) and not dir_empty(DB_DIR):
+            print("Database is already up to date. Cancelling operation.")
+            return 0
+        if not copy_json(tmpdir, DB_DIR):
+            print("Error copying JSON.")
+            return 1
+    built = build(rebuild)
+    if built:
+        print("Database populated successfully!")
+    return 0

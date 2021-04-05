@@ -2,8 +2,8 @@
 """query functions for the 5e database"""
 from __future__ import annotations
 import sys
-from typing import Any
 import requests
+from pymongo.errors import ServerSelectionTimeoutError
 from pymongo import MongoClient
 
 
@@ -12,11 +12,14 @@ from pymongo import MongoClient
 def query_database(endpoint: str, index=None):
     """query the local database"""
     client: MongoClient = MongoClient()
-    # TODO check for mongo connection
-    if "dnfo_db" not in client.list_database_names():
-        # TODO here
-        print("Database doesn't exist.")
-        sys.exit(1)
+    try:
+        if "dnfo_db" not in client.list_database_names():
+            print("Database doesn't exist.")
+            print("Build it with `dnfo --build` and try again.")
+            sys.exit(1)
+    except ServerSelectionTimeoutError as err:
+        print("Unable to connect to database. Is `mongod` running?")
+        raise SystemExit() from err
     database = client["dnfo_db"]
     try:
         response = database[endpoint].find_one({"index": index}, {"_id": False})

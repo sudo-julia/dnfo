@@ -32,12 +32,12 @@ __version__: str = "1.0.0"
 def remove_prefix(self: str, prefix: str) -> str:
     """remove a prefix from a string"""
     if self.startswith(prefix):
-        return self[len(prefix) :]
+        return self[len(prefix):]
     return self
 
 
 def remove_suffix(self: str, suffix: str) -> str:
     """remove a suffix from a string"""
     if self.endswith(suffix):
-        return self[: -len(suffix)]
+        return self[:-len(suffix)]
     return self

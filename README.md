@@ -17,17 +17,27 @@ or a help flag \(`-h|--help|help`).
 To get available indexes of an endpoint, run the command without an index:
 `python3 dnfo \[endpoint]`.
 
+## Using a Local Database
+
+1. Make sure `mongod` is running on the default host and port.
+2. Run `dnfo --build` to build the [database](https://github.com/5e-bits/5e-database)
+used by the [DnD 5th Edition API](https://www.dnd5eapi.co/).
+3. Run `dnfo` with the `--local` flag to use the local database instead of the
+online API.
+
 ## Configuration
 
-Config
+*Coming soon...*
 
 ## TODO
 
 - [ ] Tests
 - [ ] Formatting of dictionaries as values in a dict
 - [ ] If disconnected from internet and database is built, use the db
+- [ ] Config file
+  - [ ] Configurable host and port for mongo database
 - [X] Store responses in a database
-  - [ ] Populate the database and create a .lock file, with a regeneration
+  - [X] Populate the database and create a .lock file, with a regeneration
 if requested by the user
 - [X] Print rows that fit the size of the command prompt
 - [X] Store all options in arrays and check arguments against them
