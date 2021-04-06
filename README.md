@@ -2,6 +2,20 @@
 
 Search the [DnD5e API](https://www.dnd5eapi.co) and return relevant information
 
+## Requirements
+
+- Python ^3.7
+- [appdirs](https://github.com/ActiveState/appdirs)>=1.4.4 for finding
+what directories to store data in (helps this function as a
+platform-independent application)
+- [GitPython](https://github.com/gitpython-developers/GitPython)>=3.1.14 for
+downloading the database repository
+- [pymongo](https://github.com/mongodb/mongo-python-driver)>=3.11.3 for querying
+a local database
+- [requests](https://github.com/psf/requests)>=2.25.1 for querying the database
+at <https://dnd5eapi.co/api>
+- [rich](https://github.com/willmcgugan/rich)>=9.13.0 for formatting retrieved information
+
 ## Optional Requirements
 
 - If you want to query a local database (it's faster and works offline!),

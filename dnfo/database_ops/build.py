@@ -25,22 +25,6 @@ def download_db(url: str, location: str) -> str:
     return hexsha
 
 
-def hashes_match(lockfile: Path, newlock: str) -> bool:
-    """read a lockfile to see if the database needs to be updated.
-    additionally, check if hashes match"""
-    try:
-        with lockfile.open() as file:
-            oldlock: str = file.read().strip()
-        if oldlock == newlock:
-            return False
-    except FileNotFoundError:
-        pass
-    finally:
-        with lockfile.open() as file:
-            file.write(newlock.strip())
-        return True  # pylint: disable=W0150
-
-
 def lock(lockfile: Path, newlock: str) -> bool:
     """read a lockfile to see if the database needs to be updated.
     additionally, check if hashes match
@@ -130,9 +114,9 @@ def populate_db(rebuild=False) -> int:
 
     try:
         DB_DIR.mkdir(parents=True)
-        print(f"Creating '{DB_DIR}' for database storage...")
+        print(f"Storing JSON files in '{DB_DIR}'.")
     except FileExistsError:
-        print("Using existing database.")
+        print(f"Existing JSON files found at '{DB_DIR}'.")
 
     with tempfile.TemporaryDirectory(prefix="dnfo.") as tmpdir:
         head_hash = download_db(URL, tmpdir)

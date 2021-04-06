@@ -13,6 +13,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/sudo-julia/dnfo",
+    package_dir={"": "dnfo"},
     packages=find_packages(),
     modules=["database_ops", "queries"],
     classifiers=[
@@ -32,6 +33,7 @@ setup(
         "Typing :: Typed",
     ],
     install_requires=[
+        "appdirs>=1.4.4",
         "requests>=2.25.1",
         "rich>=>=9.13.0",
         "pymongo>=3.11.3",
@@ -39,4 +41,8 @@ setup(
     ],
     python_requires=">=3.7",
     entry_points={"console_scripts": ["dnfo = dnfo.__main__:main"]},
+    project_urls={
+        "Bug Reports": "https://github.com/sudo-julia/dnfo/issues",
+        "Source": "https://github.com/sudo-julia/dnfo/issues",
+    },
 )
