@@ -26,8 +26,7 @@ def get_args():
 
 def handle_args(args: list) -> list:
     """handle arguments"""
-    # TODO args for local and web, with fallback to config file if neither is given
-    # TODO if config file doesn't exist/isn't populated, default to website
+    # TODO config file that sets default for local or web if neither are given as args
     arg_set: set = set(args)
     help_set: set[str] = set(["-h", "--help"])
     ver_set: set[str] = set(["-v", "--version"])
