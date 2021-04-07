@@ -46,6 +46,7 @@ online API.
 ## TODO
 
 - [ ] Tests
+- [ ] Option to `--update` database, allowing for customization of JSON files
 - [ ] Formatting of dictionaries as values in a dict
 - [ ] If disconnected from internet and database is built, use the db
 - [ ] Config file

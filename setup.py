@@ -40,6 +40,7 @@ setup(
         "GitPython>=3.1.14",
     ],
     python_requires=">=3.7",
+    extras_requires={"tests": ["pytest>=6.2.3", "requests-mock>=1.8.0"]},
     entry_points={"console_scripts": ["dnfo = dnfo.__main__:main"]},
     project_urls={
         "Bug Reports": "https://github.com/sudo-julia/dnfo/issues",

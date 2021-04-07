@@ -65,7 +65,7 @@ def print_panel(columns, title=None):
 
 def check_endpoint(endpoint: str):
     """check if the endpoint given is valid"""
-    if endpoint.casefold() not in ENDPOINTS:
+    if endpoint not in ENDPOINTS:
         print("Invalid endpoint! Options are:")
         print_panel(ENDPOINTS)
         sys.exit(1)
@@ -160,9 +160,9 @@ database operations:
 def main() -> int:
     """query the endpoint with given arguments"""
     args = get_args()
-    location: str = args.pop(0)
+    location: str = args.pop(0).casefold()
     try:
-        endpoint: str = args.pop(0)
+        endpoint: str = args.pop(0).casefold()
         check_endpoint(endpoint)
     except IndexError:
         usage()
